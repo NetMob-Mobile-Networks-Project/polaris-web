@@ -35,6 +35,50 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
+## Docker Deployment
+
+The application can be deployed using Docker and Docker Compose. This setup includes the Next.js web application.
+
+### Prerequisites
+- Docker
+- Docker Compose
+
+### Running with Docker
+
+1. Build and start the container:
+```bash
+docker-compose up --build
+```
+
+2. Access the application:
+- Web application: http://localhost:3000
+
+### Development with Docker
+
+For development, you can use the following commands:
+
+```bash
+# Start the container in development mode
+docker-compose up
+
+# Stop the container
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Rebuild container
+docker-compose up --build
+```
+
+### Environment Variables
+The following environment variables are available:
+- `NODE_ENV`: Application environment (production/development)
+
+### Volumes
+- Application code is mounted for development
+- Node modules and Next.js build files are preserved in the container
+
 ## Project Structure and Modules
 
 ### Core Components
