@@ -1,68 +1,60 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import Chart from 'chart.js/auto';
+import { Doughnut } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  ChartData,
+  ChartOptions,
+} from 'chart.js';
 
-const data = {
-  labels: ['4G/LTE', '5G', '3G'],
-  datasets: [
-    {
-      data: [65, 25, 10],
-      backgroundColor: [
-        'rgb(99, 102, 241)', // indigo-500
-        'rgb(59, 130, 246)', // blue-500
-        'rgb(107, 114, 128)', // gray-500
-      ],
-      borderWidth: 0,
-    },
-  ],
-};
+ChartJS.register(ArcElement, Tooltip, Legend);
 
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'bottom' as const,
-      labels: {
-        color: '#374151', // text-gray-700
-        padding: 20,
-        font: {
-          size: 12,
-        },
+interface NetworkDistributionChartProps {
+  data: {
+    labels: string[];
+    data: number[];
+  };
+}
+
+export function NetworkDistributionChart({ data }: NetworkDistributionChartProps) {
+  const chartData: ChartData<'doughnut'> = {
+    labels: data.labels,
+    datasets: [
+      {
+        data: data.data,
+        backgroundColor: [
+          'rgba(59, 130, 246, 0.8)', // blue-500
+          'rgba(16, 185, 129, 0.8)', // green-500
+          'rgba(245, 158, 11, 0.8)', // yellow-500
+          'rgba(239, 68, 68, 0.8)', // red-500
+        ],
+        borderColor: [
+          'rgb(59, 130, 246)',
+          'rgb(16, 185, 129)',
+          'rgb(245, 158, 11)',
+          'rgb(239, 68, 68)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const options: ChartOptions<'doughnut'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
       },
     },
-  },
-  cutout: '70%',
-};
-
-export function NetworkDistributionChart() {
-  const chartRef = useRef<HTMLCanvasElement>(null);
-  const chartInstance = useRef<Chart | null>(null);
-
-  useEffect(() => {
-    if (chartRef.current && !chartInstance.current) {
-      const ctx = chartRef.current.getContext('2d');
-      if (ctx) {
-        chartInstance.current = new Chart(ctx, {
-          type: 'doughnut',
-          data,
-          options,
-        });
-      }
-    }
-
-    return () => {
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
-        chartInstance.current = null;
-      }
-    };
-  }, []);
+  };
 
   return (
-    <div className="relative h-full">
-      <canvas ref={chartRef} />
+    <div className="h-80">
+      <Doughnut data={chartData} options={options} />
     </div>
   );
 } 

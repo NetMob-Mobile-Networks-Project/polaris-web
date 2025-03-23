@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 
 interface ThresholdConfig {
@@ -13,6 +13,7 @@ interface ThresholdConfig {
 }
 
 export default function SettingsPage() {
+  // TODO: API Call - Fetch initial thresholds from backend
   const [thresholds, setThresholds] = useState<ThresholdConfig[]>([
     {
       id: '1',
@@ -32,7 +33,26 @@ export default function SettingsPage() {
     },
   ]);
 
+  // TODO: API Call - Fetch initial sync interval from backend
   const [syncInterval, setSyncInterval] = useState('300');
+
+  // TODO: API Call - Fetch initial map settings from backend
+  const [mapSettings, setMapSettings] = useState({
+    latitude: '35.6892',
+    longitude: '51.3890',
+    zoomLevel: 12,
+  });
+
+  // TODO: API Call - Fetch initial export settings from backend
+  const [exportSettings, setExportSettings] = useState({
+    format: 'csv',
+    includeDeviceInfo: true,
+  });
+
+  // TODO: API Call - Load all settings on component mount
+  useEffect(() => {
+    // fetchSettings();
+  }, []);
 
   const handleThresholdChange = (
     id: string,
@@ -46,9 +66,28 @@ export default function SettingsPage() {
     );
   };
 
-  const handleSaveSettings = () => {
-    // TODO: Implement settings save functionality
-    console.log('Saving settings:', { thresholds, syncInterval });
+  const handleSaveSettings = async () => {
+    try {
+      // TODO: API Call - Save all settings to backend
+      // await saveSettings({
+      //   thresholds,
+      //   syncInterval,
+      //   mapSettings,
+      //   exportSettings,
+      // });
+      console.log('Saving settings:', { thresholds, syncInterval, mapSettings, exportSettings });
+    } catch (error) {
+      // TODO: Handle error and show notification
+      console.error('Failed to save settings:', error);
+    }
+  };
+
+  const handleMapSettingsChange = (field: keyof typeof mapSettings, value: string) => {
+    setMapSettings(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleExportSettingsChange = (field: keyof typeof exportSettings, value: any) => {
+    setExportSettings(prev => ({ ...prev, [field]: value }));
   };
 
   const inputClasses = "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900";
@@ -171,7 +210,8 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     placeholder="35.6892"
-                    defaultValue="35.6892"
+                    value={mapSettings.latitude}
+                    onChange={(e) => handleMapSettingsChange('latitude', e.target.value)}
                     className={inputClasses}
                   />
                 </div>
@@ -180,7 +220,8 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     placeholder="51.3890"
-                    defaultValue="51.3890"
+                    value={mapSettings.longitude}
+                    onChange={(e) => handleMapSettingsChange('longitude', e.target.value)}
                     className={inputClasses}
                   />
                 </div>
@@ -192,7 +233,8 @@ export default function SettingsPage() {
               </label>
               <input
                 type="number"
-                defaultValue={12}
+                value={mapSettings.zoomLevel}
+                onChange={(e) => handleMapSettingsChange('zoomLevel', e.target.value)}
                 min={1}
                 max={18}
                 className={inputClasses}
@@ -210,7 +252,8 @@ export default function SettingsPage() {
                 Default Export Format
               </label>
               <select
-                defaultValue="csv"
+                value={exportSettings.format}
+                onChange={(e) => handleExportSettingsChange('format', e.target.value)}
                 className={selectClasses}
               >
                 <option value="csv">CSV</option>
@@ -222,7 +265,8 @@ export default function SettingsPage() {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  defaultChecked
+                  checked={exportSettings.includeDeviceInfo}
+                  onChange={(e) => handleExportSettingsChange('includeDeviceInfo', e.target.checked)}
                   className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 />
                 <span className="ml-2 text-sm text-gray-600">
