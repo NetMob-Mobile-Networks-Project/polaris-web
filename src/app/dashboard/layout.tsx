@@ -16,7 +16,7 @@ const navigation = [
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="flex">
+      <div className="flex h-full">
         {/* Sidebar */}
         <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
           <div className="flex flex-col flex-grow pt-5 bg-white overflow-y-auto">

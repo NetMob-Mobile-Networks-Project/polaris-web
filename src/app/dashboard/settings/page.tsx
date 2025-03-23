@@ -45,7 +45,7 @@ export default function SettingsPage() {
   };
 
   const handleSaveSettings = () => {
-    // TODO: Save settings to backend
+    // TODO: Implement settings save functionality
     console.log('Saving settings:', { thresholds, syncInterval });
   };
 
