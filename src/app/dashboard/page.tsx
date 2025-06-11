@@ -6,6 +6,7 @@ import { NetworkDistributionChart } from '@/components/charts/network-distributi
 import { DetailedMetricsTable } from '@/components/metrics/detailed-metrics-table';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useMetrics } from '@/lib/hooks/useMetrics';
+import { useNetworkChart } from '@/lib/hooks/useNetworkChart';
 import { MetricsService, TimeRange } from '@/lib/services/metrics';
 import type { DetailedMetric } from '@/components/metrics/detailed-metrics-table';
 
@@ -38,6 +39,12 @@ const timeRangeOptions: { value: TimeRange; label: string }[] = [
 
 function DashboardContent() {
   const { metrics, isLoading, error, timeRange, setTimeRange, refetch } = useMetrics('last-day');
+  const { 
+    chartData, 
+    isLoading: chartLoading, 
+    error: chartError, 
+    refetch: refetchChart 
+  } = useNetworkChart(timeRange);
 
   const handleTimeRangeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setTimeRange(e.target.value as TimeRange);
@@ -46,6 +53,10 @@ function DashboardContent() {
   const handleExportData = () => {
     // TODO: Implement export functionality
     console.log('Exporting data for time range:', timeRange);
+  };
+
+  const handleRefresh = async () => {
+    await Promise.all([refetch(), refetchChart()]);
   };
 
   // Prepare metrics array for display
@@ -84,6 +95,9 @@ function DashboardContent() {
     },
   ];
 
+  const isAnyLoading = isLoading || chartLoading;
+  const hasAnyError = error || chartError;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -94,7 +108,7 @@ function DashboardContent() {
               value={timeRange}
               onChange={handleTimeRangeChange}
               className="appearance-none rounded-md border-gray-300 pl-3 pr-10 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white text-gray-900"
-              disabled={isLoading}
+              disabled={isAnyLoading}
             >
               {timeRangeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -109,11 +123,11 @@ function DashboardContent() {
             </div>
           </div>
           <button
-            onClick={refetch}
-            disabled={isLoading}
+            onClick={handleRefresh}
+            disabled={isAnyLoading}
             className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
           >
-            {isLoading ? 'Refreshing...' : 'Refresh'}
+            {isAnyLoading ? 'Refreshing...' : 'Refresh'}
           </button>
           <button
             onClick={handleExportData}
@@ -125,17 +139,18 @@ function DashboardContent() {
       </div>
 
       {/* Error Display */}
-      {error && (
+      {hasAnyError && (
         <div className="rounded-md bg-red-50 p-4">
           <div className="flex">
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
-                Failed to load metrics
+                Failed to load data
               </h3>
-              <p className="mt-1 text-sm text-red-700">{error}</p>
+              {error && <p className="mt-1 text-sm text-red-700">Metrics: {error}</p>}
+              {chartError && <p className="mt-1 text-sm text-red-700">Chart: {chartError}</p>}
               <div className="mt-2">
                 <button
-                  onClick={refetch}
+                  onClick={handleRefresh}
                   className="text-sm font-medium text-red-600 hover:text-red-500"
                 >
                   Try again
@@ -180,13 +195,11 @@ function DashboardContent() {
         <Card className="p-6">
           <h3 className="text-lg font-medium text-gray-800 mb-4">Network Performance Trends</h3>
           <div className="h-80">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-pulse bg-gray-200 h-full w-full rounded"></div>
-              </div>
-            ) : (
-              <NetworkChart />
-            )}
+            <NetworkChart 
+              data={chartData}
+              isLoading={chartLoading}
+              error={chartError}
+            />
           </div>
         </Card>
         

@@ -12,6 +12,32 @@ export interface MetricResponse {
   };
 }
 
+export interface NetworkHistogramResponse {
+  success: boolean;
+  message: string;
+  data: {
+    labels: string[];
+    uploadData: number[];
+    downloadData: number[];
+    latencyData: number[];
+  };
+}
+
+export interface ChartDataset {
+  label: string;
+  data: number[];
+  borderColor: string;
+  backgroundColor: string;
+  fill: boolean;
+  tension: number;
+  yAxisID: string;
+}
+
+export interface NetworkChartData {
+  labels: string[];
+  datasets: ChartDataset[];
+}
+
 export interface DashboardMetrics {
   downloadSpeed: {
     value: number;
@@ -60,6 +86,54 @@ export class MetricsService {
   static async getNetworkAvailability(timeRange: TimeRange = 'last-day'): Promise<MetricResponse> {
     const response = await api.get<MetricResponse>(`/metrics/network-availability?start=${timeRange}`);
     return response.data;
+  }
+
+  // Get network histogram data
+  static async getNetworkHistogram(timeRange: TimeRange = 'last-day'): Promise<NetworkHistogramResponse> {
+    const response = await api.get<NetworkHistogramResponse>(`/metrics/network-histogram?start=${timeRange}`);
+    return response.data;
+  }
+
+  // Transform histogram data to chart format
+  static transformHistogramToChartData(histogramData: NetworkHistogramResponse['data']): NetworkChartData {
+    const { labels, uploadData, downloadData, latencyData } = histogramData;
+
+    // Convert kbps to Mbps for better readability
+    const downloadMbps = downloadData.map(speed => speed / 1000);
+    const uploadMbps = uploadData.map(speed => speed / 1000);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Download Speed (Mbps)',
+          data: downloadMbps,
+          borderColor: 'rgb(99, 102, 241)', // indigo-500
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          fill: true,
+          tension: 0.4,
+          yAxisID: 'y',
+        },
+        {
+          label: 'Upload Speed (Mbps)',
+          data: uploadMbps,
+          borderColor: 'rgb(59, 130, 246)', // blue-500
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          fill: true,
+          tension: 0.4,
+          yAxisID: 'y',
+        },
+        {
+          label: 'Latency (ms)',
+          data: latencyData,
+          borderColor: 'rgb(239, 68, 68)', // red-500
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          fill: true,
+          tension: 0.4,
+          yAxisID: 'y1',
+        },
+      ],
+    };
   }
 
   // Get all metrics at once
@@ -154,6 +228,8 @@ export const {
   getAvgUpSpeed,
   getAvgLatency,
   getNetworkAvailability,
+  getNetworkHistogram,
+  transformHistogramToChartData,
   getAllMetrics,
   getTimeRangeLabel,
 } = MetricsService; 
