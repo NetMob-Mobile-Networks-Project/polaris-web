@@ -136,6 +136,22 @@ export interface DetailedListResponse {
   };
 }
 
+export interface ClientConfigResponse {
+  samplingIntervalSeconds: number;
+  testTypes: string[];
+}
+
+export interface ConfigResponse {
+  success: boolean;
+  message: string;
+  data: ClientConfigResponse;
+}
+
+export interface UpdateConfigRequest {
+  samplingIntervalSeconds: number;
+  testTypes: string[];
+}
+
 export class MetricsService {
   // Get average download speed
   static async getAvgDownSpeed(timeRange: TimeRange = 'last-day'): Promise<MetricResponse> {
@@ -363,6 +379,18 @@ export class MetricsService {
     const response = await api.get<DetailedListResponse>(`/metrics/detailed-list?${queryParams.toString()}`);
     return response.data;
   }
+
+  // Get client configuration
+  static async getClientConfig(): Promise<ConfigResponse> {
+    const response = await api.get<ConfigResponse>('/config');
+    return response.data;
+  }
+
+  // Update client configuration
+  static async updateClientConfig(config: UpdateConfigRequest): Promise<ConfigResponse> {
+    const response = await api.put<ConfigResponse>('/admin/config', config);
+    return response.data;
+  }
 }
 
 // Convenience exports
@@ -379,4 +407,6 @@ export const {
   getAllMetrics,
   getTimeRangeLabel,
   getDetailedList,
+  getClientConfig,
+  updateClientConfig,
 } = MetricsService; 
