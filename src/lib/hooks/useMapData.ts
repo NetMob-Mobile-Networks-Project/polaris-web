@@ -26,15 +26,22 @@ export function useMapData(initialBounds?: MapBounds): UseMapDataReturn {
       
       console.log('Raw API response:', response);
       
-      if (response.success && response.data?.points) {
-        console.log('Data points structure:', {
-          totalPoints: response.data.points.length,
-          firstPoint: response.data.points[0],
-          samplePointKeys: response.data.points[0] ? Object.keys(response.data.points[0]) : []
-        });
+      if (response.success) {        
+        // Check if points data exists
+        if (!response.data.points) {
+          console.warn('API returned null/undefined points data');
+          setMapData([]);
+          return;
+        }
         
         // Validate and clean the data (handling simple string coordinates)
         const validPoints = response.data.points.filter((point, index) => {
+          // First check if the point itself is not null/undefined
+          if (!point) {
+            console.warn(`Filtering out nil/null point at index ${index}`);
+            return false;
+          }
+          
           // Check if coordinate fields exist and are not empty
           const hasCoordFields = point.latitude && 
                                point.longitude && 
