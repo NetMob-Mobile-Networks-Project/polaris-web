@@ -52,27 +52,41 @@ export default function AnalyticsPage() {
   };
 
   // Handle export functionality
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!data?.data?.values || data.data.values.length === 0) {
       alert('No data available to export');
       return;
     }
 
     try {
-      // Convert data to CSV format
-      const headers = data.data.labels.join(',');
-      const rows = data.data.values.map(row => 
-        data.data.labels.map(label => {
-          const value = row[label];
-          // Escape commas and quotes in CSV
-          if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-            return `"${value.replace(/"/g, '""')}"`;
-          }
-          return value ?? '';
-        }).join(',')
-      );
+      // Construct the export URL with current filters
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://45.139.11.225:8080/api/v1';
+      const params = new URLSearchParams({
+        start: timeRange,
+        page: currentPage.toString(),
+        metric: activeTab
+      });
       
-      const csvContent = [headers, ...rows].join('\n');
+      const exportUrl = `${baseUrl}/export/csv?${params.toString()}`;
+      
+      // Get auth token for the request
+      const token = localStorage.getItem('auth-token');
+      
+      // Fetch the CSV data from backend
+      const response = await fetch(exportUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.status} ${response.statusText}`);
+      }
+
+      // Get the CSV content
+      const csvContent = await response.text();
       
       // Create and download file
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -84,6 +98,7 @@ export default function AnalyticsPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Export failed:', err);
       alert('Failed to export data. Please try again.');

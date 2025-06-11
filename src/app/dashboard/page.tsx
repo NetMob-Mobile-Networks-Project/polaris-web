@@ -57,10 +57,10 @@ function DashboardContent() {
     setTimeRange(e.target.value as TimeRange);
   };
 
-  const handleExportData = () => {
-    // TODO: Implement export functionality
-    console.log('Exporting data for time range:', timeRange);
-  };
+  // const handleExportData = () => {
+  //   // TODO: Implement export functionality
+  //   console.log('Exporting data for time range:', timeRange);
+  // };
 
   const handleRefresh = async () => {
     await Promise.all([refetch(), refetchChart(), refetchDistribution()]);
@@ -136,12 +136,12 @@ function DashboardContent() {
           >
             {isAnyLoading ? 'Refreshing...' : 'Refresh'}
           </button>
-          <button
+          {/* <button
             onClick={handleExportData}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Export Data
-          </button>
+          </button> */}
         </div>
       </div>
 

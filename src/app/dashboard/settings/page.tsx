@@ -309,7 +309,7 @@ export default function SettingsPage() {
           )}
         </Card>
 
-        <Card className="p-6">
+        {/* <Card className="p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Export Settings</h2>
           <div className="max-w-xl space-y-4">
             <div>
@@ -322,23 +322,10 @@ export default function SettingsPage() {
               >
                 <option value="csv">CSV</option>
                 <option value="kml">KML</option>
-                <option value="json">JSON</option>
               </select>
             </div>
-            <div>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-                <span className="ml-2 text-sm text-gray-600">
-                  Include device information in exports
-                </span>
-              </label>
-            </div>
           </div>
-        </Card>
+        </Card> */}
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">

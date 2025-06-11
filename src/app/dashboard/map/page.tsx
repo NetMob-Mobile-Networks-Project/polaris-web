@@ -238,9 +238,51 @@ function MapContent() {
     }));
   };
 
-  const handleExportKML = () => {
-    // TODO: Implement KML export functionality
-    console.log('Exporting KML for:', mapData.length, 'data points');
+  const handleExportKML = async () => {
+    if (mapData.length === 0) {
+      alert('No data available to export');
+      return;
+    }
+
+    try {
+      // Construct the export URL
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://45.139.11.225:8080/api/v1';
+      const exportUrl = `${baseUrl}/export/kml`;
+      
+      // Get auth token for the request
+      const token = localStorage.getItem('auth-token');
+      
+      // Fetch the KML data from backend
+      const response = await fetch(exportUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.status} ${response.statusText}`);
+      }
+
+      // Get the KML content
+      const kmlContent = await response.text();
+      
+      // Create and download file
+      const blob = new Blob([kmlContent], { type: 'application/vnd.google-earth.kml+xml;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `network_coverage_map_${new Date().toISOString().split('T')[0]}.kml`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('KML export failed:', err);
+      alert('Failed to export KML data. Please try again.');
+    }
   };
 
   // Calculate stats for selected area
