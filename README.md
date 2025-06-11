@@ -1,203 +1,258 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Polaris QoE Web Dashboard
+
+A comprehensive web-based dashboard for monitoring and analyzing network Quality of Experience (QoE) metrics. This Next.js application provides real-time visualization of network performance data collected from mobile devices.
+
+## Features
+
+### 🔐 Authentication & Authorization
+- Secure login system with JWT token authentication
+- Role-based access control (Admin/User)
+- Protected routes with automatic session management
+- Token expiration handling and refresh
+
+### 📊 Real-time Analytics
+- Dynamic metrics tables with pagination
+- Multiple metric types: Network, Ping, HTTP, DNS, Web, SMS
+- Time-based filtering (Last Hour, 24 Hours, 7 Days, 30 Days)
+- CSV export functionality for detailed analysis
+- Interactive data visualization
+
+### 🗺️ Interactive Network Coverage Map
+- Real-time network coverage visualization using Leaflet
+- Dynamic color-coding based on signal strength and quality
+- Customizable threshold settings for performance indicators
+- Map bounds-based data fetching for optimal performance
+- KML export for use with Google Earth and other mapping tools
+- Responsive design with mobile support
+
+### ⚙️ Administrative Settings
+- **Data Collection Configuration**: Sampling intervals and test types
+- **User Management**: Create, view, and delete users (Admin only)
+- **Export Settings**: Default formats and preferences
+- Real-time configuration updates
+
+### 🎯 Dashboard Overview
+- Key performance indicators (KPIs)
+- Network status summaries
+- Quick access to all major features
+- Responsive layout with sidebar navigation
+
+## Technology Stack
+
+- **Frontend**: Next.js 15.2.3, React 19, TypeScript
+- **Styling**: Tailwind CSS, Headless UI
+- **Maps**: Leaflet with React-Leaflet
+- **Charts**: Chart.js (ready for implementation)
+- **Authentication**: JWT with localStorage
+- **HTTP Client**: Axios with interceptors
+- **Icons**: Heroicons
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js 18+ 
+- npm, yarn, pnpm, or bun
+- Backend API server running
 
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd polaris-web
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+3. Set up environment variables:
+```bash
+cp .env.example .env.local
+```
+
+Configure the following variables in `.env.local`:
+```env
+NEXT_PUBLIC_API_BASE_URL=http://your-backend-url:8080/api/v1
+```
+
+4. Run the development server:
 ```bash
 npm run dev
 # or
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Docker Deployment
 
-The application can be deployed using Docker and Docker Compose. This setup includes the Next.js web application.
-
-### Prerequisites
-- Docker
-- Docker Compose
-
-### Running with Docker
+### Using Docker Compose
 
 1. Build and start the container:
 ```bash
 docker-compose up --build
 ```
 
-2. Access the application:
-- Web application: http://localhost:3000
+2. Access the application at [http://localhost:3000](http://localhost:3000)
 
 ### Development with Docker
 
-For development, you can use the following commands:
-
 ```bash
-# Start the container in development mode
+# Start in development mode
 docker-compose up
 
-# Stop the container
+# Stop containers
 docker-compose down
 
 # View logs
-docker-compose logs -f
+docker-compose logs -f web
 
-# Rebuild container
+# Rebuild after changes
 docker-compose up --build
 ```
 
-### Environment Variables
-The following environment variables are available:
-- `NODE_ENV`: Application environment (production/development)
+## Project Structure
 
-### Volumes
-- Application code is mounted for development
-- Node modules and Next.js build files are preserved in the container
+```
+src/
+├── app/                          # Next.js App Router
+│   ├── auth/                     # Authentication pages
+│   │   └── login/               # Login page
+│   ├── dashboard/               # Protected dashboard area
+│   │   ├── analytics/           # Analytics and reporting
+│   │   ├── map/                 # Network coverage map
+│   │   ├── settings/            # Admin settings
+│   │   └── layout.tsx           # Dashboard layout with navigation
+│   └── globals.css              # Global styles
+├── components/                   # Reusable components
+│   ├── auth/                    # Authentication components
+│   │   └── ProtectedRoute.tsx   # Route protection wrapper
+│   ├── charts/                  # Chart components
+│   ├── map/                     # Map-related components
+│   │   └── network-map.tsx      # Interactive network map
+│   ├── metrics/                 # Metrics display components
+│   │   └── dynamic-metrics-table.tsx
+│   └── ui/                      # UI components
+│       ├── card.tsx             # Base card component
+│       └── metric-card.tsx      # Metric display card
+├── lib/                         # Utilities and services
+│   ├── hooks/                   # Custom React hooks
+│   │   ├── useAuth.ts           # Authentication hook
+│   │   ├── useAnalyticsData.ts  # Analytics data fetching
+│   │   ├── useConfigData.ts     # Configuration management
+│   │   ├── useMapData.ts        # Map data with bounds
+│   │   └── useUsersData.ts      # User management
+│   ├── services/                # API services
+│   │   ├── auth.ts              # Authentication service
+│   │   └── metrics.ts           # Metrics API service
+│   └── axios.ts                 # HTTP client configuration
+└── types/                       # TypeScript type definitions
+```
 
-## Project Structure and Modules
+## API Integration
 
-### Core Components
+The application integrates with the following backend endpoints:
 
-#### Authentication (`/src/app/auth/`)
-- `login/page.tsx`: Handles user authentication with email/password
-- Implements form validation and error handling
-- Currently uses placeholder authentication (to be replaced with actual auth system)
+### Authentication
+- `POST /auth/login` - User authentication
+- `GET /auth/me` - Get current user profile
 
-#### Dashboard (`/src/app/dashboard/`)
-- Main application interface after login
-- Features:
-  - Overview of network performance metrics
-  - Quick access to all major features
-  - Real-time data updates
-  - Responsive layout with sidebar navigation
+### Metrics & Analytics
+- `GET /metrics/detailed-list` - Paginated metrics data
+- `GET /metrics/map-data` - Geographic network data
+- `GET /export/csv` - Export metrics as CSV
+- `GET /export/kml` - Export map data as KML
 
-#### Map View (`/src/app/dashboard/map/`)
-- Interactive network coverage visualization
-- Features:
-  - Dynamic color-coding based on network metrics
-  - Filtering by network type (4G/LTE, 5G, 3G)
-  - Data export in KML format
-  - Real-time updates of network status
+### Configuration & Users
+- `GET /config` - Get system configuration
+- `PUT /config` - Update system configuration
+- `GET /users` - List users (Admin only)
+- `POST /users` - Create user (Admin only)
+- `DELETE /users/{id}` - Delete user (Admin only)
 
-#### Analytics (`/src/app/dashboard/analytics/`)
-- Detailed performance analysis and trends
-- Features:
-  - Historical data visualization
-  - Performance metrics comparison
-  - Customizable time ranges
-  - Export capabilities
+## Key Features Explained
 
-#### Settings (`/src/app/dashboard/settings/`)
-- User preferences and system configuration
-- Features:
-  - Alert threshold configuration
-  - Map view preferences
-  - Data collection settings
-  - User profile management
+### Real-time Map Updates
+The network coverage map automatically fetches new data when:
+- Map bounds change (pan/zoom)
+- User stops interacting (debounced)
+- Manual refresh is triggered
 
-### Components
+### Role-based Access Control
+- **Admin users**: Full access to all features including user management and settings
+- **Regular users**: Access to dashboard, analytics, and map views
+- Settings tab is hidden for non-admin users
 
-#### Network Map (`/src/components/map/network-map.tsx`)
-- Interactive map implementation using Leaflet
-- Features:
-  - Dynamic marker placement
-  - Color-coded network status
-  - Popup information windows
-  - Real-time updates
+### Data Export Capabilities
+- **CSV Export**: Detailed metrics data with current filters applied
+- **KML Export**: Geographic data for use in mapping applications
+- Server-side generation ensures consistent formatting
 
-#### Network Chart (`/src/components/charts/network-chart.tsx`)
-- Performance visualization using Chart.js
-- Features:
-  - Line charts for various metrics
-  - Multiple dataset comparison
-  - Responsive design
-  - Customizable options
+### Responsive Design
+- Mobile-friendly navigation with collapsible sidebar
+- Responsive tables and charts
+- Touch-optimized map interactions
 
-#### Metric Card (`/src/components/ui/metric-card.tsx`)
-- Reusable component for displaying metrics
-- Features:
-  - Trend indicators (up/down arrows)
-  - Percentage change display
-  - Customizable styling
-  - Responsive layout
+## Environment Variables
 
-#### Card (`/src/components/ui/card.tsx`)
-- Base component for consistent styling
-- Features:
-  - Shadow and border styling
-  - Flexible content area
-  - Customizable className support
-  - Responsive design
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_API_BASE_URL` | Backend API base URL | `http://45.139.11.225:8080/api/v1` |
+| `NODE_ENV` | Application environment | `development` |
 
-### Types and Interfaces (`/src/types/`)
-- `network.ts`: TypeScript interfaces for network data
-  - NetworkMetrics: Structure for network performance data
-  - User: User profile and preferences
-  - ThresholdConfig: Alert threshold configuration
+## Development
 
-### Layout Components
-- `RootLayout`: Base application layout with font configuration
-- `DashboardLayout`: Dashboard-specific layout with navigation
-- Implements responsive design and consistent styling
+### Code Structure
+- **Custom Hooks**: Centralized data fetching and state management
+- **Service Layer**: API abstraction with error handling
+- **Component Architecture**: Reusable, composable components
+- **Type Safety**: Full TypeScript coverage
 
-### Configuration Files
-- `next.config.ts`: Next.js configuration
-- `tsconfig.json`: TypeScript configuration
-- `eslint.config.mjs`: ESLint rules and settings
-- `tailwind.config.ts`: Tailwind CSS configuration
-
-### Dependencies
-- Next.js 15.2.3: React framework
-- React 19: UI library
-- Chart.js: Data visualization
-- Leaflet: Interactive maps
-- Tailwind CSS: Styling
-- TypeScript: Type safety
-- Various UI components from Headless UI and Heroicons
-
-### Development Tools
-- ESLint: Code linting
-- TypeScript: Type checking
-- Turbopack: Fast development server
-- PostCSS: CSS processing
+### Authentication Flow
+1. User logs in with email/password
+2. JWT token stored in localStorage
+3. Token included in all API requests
+4. Automatic logout on token expiration
+5. Protected routes redirect to login if unauthenticated
 
 ### Data Flow
-1. Android client collects network metrics
-2. Data is sent to backend API
-3. Web application fetches and processes data
-4. Components update to display latest information
-5. Real-time updates via WebSocket (to be implemented)
+1. Mobile clients collect network metrics
+2. Data sent to backend API
+3. Web application fetches processed data
+4. Real-time updates via API polling
+5. Interactive visualizations update automatically
 
-### Future Enhancements
-- Implement actual authentication system
-- Add WebSocket for real-time updates
-- Enhance data export capabilities
-- Add more visualization options
-- Implement user management
-- Add Persian language support
-- Enhance mobile responsiveness
+## Deployment
+
+### Production Build
+```bash
+npm run build
+npm start
+```
+
+### Environment Setup
+Ensure the following for production:
+- Set `NODE_ENV=production`
+- Configure proper API base URL
+- Set up SSL/HTTPS
+- Configure proper CORS on backend
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
