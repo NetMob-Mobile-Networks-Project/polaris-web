@@ -1,8 +1,60 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
-import { MetricCard } from '@/components/metrics/metric-card';
 import { NetworkChart } from '@/components/charts/network-chart';
+import { NetworkDistributionChart } from '@/components/charts/network-distribution-chart';
+import { DetailedMetricsTable } from '@/components/metrics/detailed-metrics-table';
+import type { DetailedMetric } from '@/components/metrics/detailed-metrics-table';
+
+const metrics = [
+  {
+    id: 'download',
+    label: 'Download Speed',
+    value: '45.2 Mbps',
+    change: '+5.2%',
+    isPositive: true,
+  },
+  {
+    id: 'upload',
+    label: 'Upload Speed',
+    value: '12.8 Mbps',
+    change: '-2.1%',
+    isPositive: false,
+  },
+  {
+    id: 'latency',
+    label: 'Average Latency',
+    value: '42 ms',
+    change: '-8%',
+    isPositive: true,
+  },
+  {
+    id: 'availability',
+    label: 'Network Availability',
+    value: '99.8%',
+    change: '+0.2%',
+    isPositive: true,
+  },
+];
+
+const detailedMetrics: DetailedMetric[] = [
+  {
+    id: 'tehran-north',
+    region: 'Tehran North',
+    networkType: '5G',
+    avgSpeed: '85.2 Mbps',
+    signalStrength: '-75 dBm',
+    latency: '32 ms',
+  },
+  {
+    id: 'tehran-south',
+    region: 'Tehran South',
+    networkType: '4G/LTE',
+    avgSpeed: '45.8 Mbps',
+    signalStrength: '-82 dBm',
+    latency: '38 ms',
+  },
+];
 
 export default function DashboardPage() {
   return (
@@ -29,30 +81,25 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Average Download Speed"
-          value="45.2 Mbps"
-          change={+5.2}
-          changeLabel="from last period"
-        />
-        <MetricCard
-          title="Average Upload Speed"
-          value="12.8 Mbps"
-          change={-2.1}
-          changeLabel="from last period"
-        />
-        <MetricCard
-          title="Average Latency"
-          value="42 ms"
-          change={-8}
-          changeLabel="from last period"
-        />
-        <MetricCard
-          title="Active Devices"
-          value="127"
-          change={+12}
-          changeLabel="from last period"
-        />
+        {metrics.map((metric) => (
+          <Card key={metric.id} className="px-4 py-5">
+            <dt className="text-sm font-medium text-gray-500">{metric.label}</dt>
+            <dd className="mt-1">
+              <div className="flex items-baseline">
+                <div className="text-2xl font-semibold text-gray-900">
+                  {metric.value}
+                </div>
+                <div
+                  className={`ml-2 flex items-baseline text-sm font-semibold ${
+                    metric.isPositive ? 'text-green-600' : 'text-red-600'
+                  }`}
+                >
+                  {metric.change}
+                </div>
+              </div>
+            </dd>
+          </Card>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -64,30 +111,14 @@ export default function DashboardPage() {
         </Card>
         
         <Card className="p-6">
-          <h3 className="text-lg font-medium text-gray-800 mb-4">Active Alerts</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
-              <div>
-                <p className="text-sm font-medium text-red-900">High Latency Detected</p>
-                <p className="text-sm text-red-800">Region: Tehran North</p>
-              </div>
-              <span className="px-2 py-1 text-xs font-medium text-red-900 bg-red-100 rounded-full">
-                Critical
-              </span>
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-yellow-50 rounded-lg">
-              <div>
-                <p className="text-sm font-medium text-yellow-900">Low Signal Strength</p>
-                <p className="text-sm text-yellow-800">Region: Tehran East</p>
-              </div>
-              <span className="px-2 py-1 text-xs font-medium text-yellow-900 bg-yellow-100 rounded-full">
-                Warning
-              </span>
-            </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-4">Network Distribution</h3>
+          <div className="h-80">
+            <NetworkDistributionChart />
           </div>
         </Card>
       </div>
+
+      <DetailedMetricsTable metrics={detailedMetrics} />
     </div>
   );
 } 

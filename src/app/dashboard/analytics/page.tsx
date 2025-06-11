@@ -2,45 +2,11 @@
 
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { NetworkChart } from '@/components/charts/network-chart';
-import { NetworkDistributionChart } from '@/components/charts/network-distribution-chart';
-import { MetricCard } from '@/components/metrics/metric-card';
 
 const timeRanges = [
   { id: '24h', label: 'Last 24 Hours' },
   { id: '7d', label: 'Last 7 Days' },
   { id: '30d', label: 'Last 30 Days' },
-];
-
-const metrics = [
-  {
-    id: 'download',
-    label: 'Download Speed',
-    value: '45.2 Mbps',
-    change: '+5.2%',
-    isPositive: true,
-  },
-  {
-    id: 'upload',
-    label: 'Upload Speed',
-    value: '12.8 Mbps',
-    change: '-2.1%',
-    isPositive: false,
-  },
-  {
-    id: 'latency',
-    label: 'Average Latency',
-    value: '42 ms',
-    change: '-8%',
-    isPositive: true,
-  },
-  {
-    id: 'availability',
-    label: 'Network Availability',
-    value: '99.8%',
-    change: '+0.2%',
-    isPositive: true,
-  },
 ];
 
 export default function AnalyticsPage() {
@@ -75,109 +41,6 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {metrics.map((metric) => (
-          <Card key={metric.id} className="px-4 py-5">
-            <dt className="text-sm font-medium text-gray-500">{metric.label}</dt>
-            <dd className="mt-1">
-              <div className="flex items-baseline">
-                <div className="text-2xl font-semibold text-gray-900">
-                  {metric.value}
-                </div>
-                <div
-                  className={`ml-2 flex items-baseline text-sm font-semibold ${
-                    metric.isPositive ? 'text-green-600' : 'text-red-600'
-                  }`}
-                >
-                  {metric.change}
-                </div>
-              </div>
-            </dd>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card className="p-6">
-          <h3 className="text-lg font-medium text-gray-800 mb-4">Performance Trends</h3>
-          <div className="h-80">
-            <NetworkChart />
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <h3 className="text-lg font-medium text-gray-800 mb-4">Network Distribution</h3>
-          <div className="h-80">
-            <NetworkDistributionChart />
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Top Problem Areas</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
-              <div>
-                <p className="text-sm font-medium text-red-800">Tehran North - District 1</p>
-                <p className="text-sm text-red-700">High latency and packet loss</p>
-              </div>
-              <span className="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded-full">
-                Critical
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-4 bg-yellow-50 rounded-lg">
-              <div>
-                <p className="text-sm font-medium text-yellow-800">Tehran East - District 4</p>
-                <p className="text-sm text-yellow-700">Low signal strength</p>
-              </div>
-              <span className="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">
-                Warning
-              </span>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Device Distribution</h3>
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-gray-600">Samsung</span>
-                <span className="text-sm font-medium text-gray-900">40%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-600 h-2 rounded-full" style={{ width: '40%' }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-gray-600">Xiaomi</span>
-                <span className="text-sm font-medium text-gray-900">30%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-600 h-2 rounded-full" style={{ width: '30%' }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-gray-600">Huawei</span>
-                <span className="text-sm font-medium text-gray-900">20%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-600 h-2 rounded-full" style={{ width: '20%' }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-gray-600">Others</span>
-                <span className="text-sm font-medium text-gray-900">10%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-600 h-2 rounded-full" style={{ width: '10%' }}></div>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
 
       <Card className="p-6">
         <h3 className="text-lg font-medium text-gray-800 mb-4">Detailed Metrics</h3>
