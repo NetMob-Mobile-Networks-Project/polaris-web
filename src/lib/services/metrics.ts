@@ -32,6 +32,46 @@ export interface NetworkDistributionResponse {
   };
 }
 
+export interface MapDataPoint {
+  id: number;
+  device_id: string;
+  timestamp: string;
+  latitude: string;
+  longitude: string;
+  cellular_technology: string;
+  network_operator_name: string;
+  network_operator_mccmnc: string;
+  lac: number;
+  rac: number;
+  tac: number;
+  cell_id: number;
+  arfcn: number;
+  signal_strength: number;
+  signal_quality: number;
+  additional_params: string;
+}
+
+export interface MapDataResponse {
+  success: boolean;
+  message: string;
+  data: {
+    points: MapDataPoint[];
+    bounds: {
+      min_lat: number;
+      max_lat: number;
+      min_long: number;
+      max_long: number;
+    };
+  };
+}
+
+export interface MapBounds {
+  minLat?: number;
+  maxLat?: number;
+  minLong?: number;
+  maxLong?: number;
+}
+
 export interface ChartDataset {
   label: string;
   data: number[];
@@ -115,6 +155,30 @@ export class MetricsService {
   // Get network distribution data
   static async getNetworkDistribution(timeRange: TimeRange = 'last-day'): Promise<NetworkDistributionResponse> {
     const response = await api.get<NetworkDistributionResponse>(`/metrics/network-distribution?start=${timeRange}`);
+    return response.data;
+  }
+
+  // Get map data for network measurements
+  static async getMapData(bounds?: MapBounds): Promise<MapDataResponse> {
+    const params = new URLSearchParams();
+    
+    if (bounds?.minLat !== undefined) {
+      params.append('min_lat', bounds.minLat.toString());
+    }
+    if (bounds?.maxLat !== undefined) {
+      params.append('max_lat', bounds.maxLat.toString());
+    }
+    if (bounds?.minLong !== undefined) {
+      params.append('min_long', bounds.minLong.toString());
+    }
+    if (bounds?.maxLong !== undefined) {
+      params.append('max_long', bounds.maxLong.toString());
+    }
+
+    const queryString = params.toString();
+    const url = queryString ? `/metrics/map-data?${queryString}` : '/metrics/map-data';
+    
+    const response = await api.get<MapDataResponse>(url);
     return response.data;
   }
 
@@ -282,6 +346,7 @@ export const {
   getNetworkAvailability,
   getNetworkHistogram,
   getNetworkDistribution,
+  getMapData,
   transformHistogramToChartData,
   transformDistributionToChartData,
   getAllMetrics,
