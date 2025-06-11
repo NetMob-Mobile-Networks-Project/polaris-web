@@ -97,7 +97,7 @@ export default function NetworkMap({ activeMetric }: NetworkMapProps) {
     };
   }, [activeMetric]);
 
-  return <div id="map" className="w-full h-full" />;
+  return <div id="map" className="w-full h-full z-0" />;
 }
 
 function getMetricValue(point: NetworkMetrics, metric: string): number {
