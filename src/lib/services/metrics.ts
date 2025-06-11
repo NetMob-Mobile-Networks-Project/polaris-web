@@ -152,6 +152,41 @@ export interface UpdateConfigRequest {
   testTypes: string[];
 }
 
+export interface UserResponse {
+  id: number;
+  email: string;
+  role: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListUsersResponse {
+  users: UserResponse[];
+  total_count: number;
+  page: number;
+  page_size: number;
+}
+
+export interface UsersApiResponse {
+  message: string;
+  data: ListUsersResponse;
+}
+
+export interface CreateUserRequest {
+  email: string;
+  password: string;
+  role: string;
+}
+
+export interface CreateUserApiResponse {
+  message: string;
+  data: UserResponse;
+}
+
+export interface DeleteUserApiResponse {
+  message: string;
+}
+
 export class MetricsService {
   // Get average download speed
   static async getAvgDownSpeed(timeRange: TimeRange = 'last-day'): Promise<MetricResponse> {
@@ -391,6 +426,29 @@ export class MetricsService {
     const response = await api.put<ConfigResponse>('/admin/config', config);
     return response.data;
   }
+
+  // Get list of users with pagination
+  static async getUsers(page: number = 1, pageSize: number = 10): Promise<UsersApiResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      page_size: pageSize.toString()
+    });
+
+    const response = await api.get<UsersApiResponse>(`/admin/users?${params.toString()}`);
+    return response.data;
+  }
+
+  // Create a new user
+  static async createUser(userData: CreateUserRequest): Promise<CreateUserApiResponse> {
+    const response = await api.post<CreateUserApiResponse>('/admin/users', userData);
+    return response.data;
+  }
+
+  // Delete a user
+  static async deleteUser(userId: number): Promise<DeleteUserApiResponse> {
+    const response = await api.delete<DeleteUserApiResponse>(`/admin/users/${userId}`);
+    return response.data;
+  }
 }
 
 // Convenience exports
@@ -409,4 +467,7 @@ export const {
   getDetailedList,
   getClientConfig,
   updateClientConfig,
+  getUsers,
+  createUser,
+  deleteUser,
 } = MetricsService; 
