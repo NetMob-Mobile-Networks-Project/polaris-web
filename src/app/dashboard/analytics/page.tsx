@@ -1,175 +1,94 @@
 'use client';
 
 import { useState } from 'react';
-import { MetricsTable } from '@/components/metrics/metrics-table';
-import type { MetricsData } from '@/components/metrics/metrics-table';
+import { DynamicMetricsTable } from '@/components/metrics/dynamic-metrics-table';
+import { useAnalyticsData } from '@/lib/hooks/useAnalyticsData';
+import type { DetailedListParams } from '@/lib/services/metrics';
 
+// Map UI time ranges to API time ranges
 const timeRanges = [
-  { id: '24h', label: 'Last 24 Hours' },
-  { id: '7d', label: 'Last 7 Days' },
-  { id: '30d', label: 'Last 30 Days' },
-];
+  { id: 'last-hour', label: 'Last Hour' },
+  { id: 'last-day', label: 'Last 24 Hours' },
+  { id: 'last-week', label: 'Last 7 Days' },
+  { id: 'last-month', label: 'Last 30 Days' },
+] as const;
 
 const metricTabs = [
   { id: 'network', label: 'Network' },
-  { id: 'http', label: 'HTTP' },
-  { id: 'sms', label: 'SMS' },
-  { id: 'dns', label: 'DNS' },
   { id: 'ping', label: 'Ping' },
-];
-
-// Data structures for each metric type
-const metricsData: MetricsData = {
-  network: [
-    {
-      id: 'net-1',
-      region: 'Tehran North',
-      networkType: '5G',
-      avgSpeed: '85.2 Mbps',
-      signalStrength: '-75 dBm',
-      latency: '32 ms',
-      uptime: '99.8%',
-    },
-    {
-      id: 'net-2',
-      region: 'Tehran South',
-      networkType: '4G/LTE',
-      avgSpeed: '45.8 Mbps',
-      signalStrength: '-82 dBm',
-      latency: '38 ms',
-      uptime: '98.5%',
-    },
-    {
-      id: 'net-3',
-      region: 'Tehran East',
-      networkType: '4G/LTE',
-      avgSpeed: '52.1 Mbps',
-      signalStrength: '-78 dBm',
-      latency: '41 ms',
-      uptime: '99.2%',
-    },
-  ],
-  http: [
-    {
-      id: 'http-1',
-      endpoint: '/api/users',
-      method: 'GET',
-      avgResponseTime: '245 ms',
-      successRate: '99.2%',
-      requestCount: '15,247',
-      errorRate: '0.8%',
-    },
-    {
-      id: 'http-2',
-      endpoint: '/api/data',
-      method: 'POST',
-      avgResponseTime: '412 ms',
-      successRate: '97.8%',
-      requestCount: '8,934',
-      errorRate: '2.2%',
-    },
-    {
-      id: 'http-3',
-      endpoint: '/api/auth',
-      method: 'POST',
-      avgResponseTime: '189 ms',
-      successRate: '99.9%',
-      requestCount: '3,421',
-      errorRate: '0.1%',
-    },
-  ],
-  sms: [
-    {
-      id: 'sms-1',
-      carrier: 'Hamrah-e Avval',
-      messagesSent: '12,547',
-      deliveryRate: '98.5%',
-      avgDeliveryTime: '2.3 sec',
-      failureRate: '1.5%',
-      cost: '$245.67',
-    },
-    {
-      id: 'sms-2',
-      carrier: 'Irancell',
-      messagesSent: '8,932',
-      deliveryRate: '97.2%',
-      avgDeliveryTime: '3.1 sec',
-      failureRate: '2.8%',
-      cost: '$178.42',
-    },
-    {
-      id: 'sms-3',
-      carrier: 'RighTel',
-      messagesSent: '4,521',
-      deliveryRate: '96.8%',
-      avgDeliveryTime: '3.8 sec',
-      failureRate: '3.2%',
-      cost: '$92.15',
-    },
-  ],
-  dns: [
-    {
-      id: 'dns-1',
-      server: '8.8.8.8',
-      queries: '45,321',
-      avgResponseTime: '12 ms',
-      successRate: '99.9%',
-      cacheHitRate: '85.2%',
-      errors: '45',
-    },
-    {
-      id: 'dns-2',
-      server: '1.1.1.1',
-      queries: '38,967',
-      avgResponseTime: '8 ms',
-      successRate: '99.8%',
-      cacheHitRate: '87.4%',
-      errors: '78',
-    },
-    {
-      id: 'dns-3',
-      server: '208.67.222.222',
-      queries: '29,845',
-      avgResponseTime: '15 ms',
-      successRate: '99.6%',
-      cacheHitRate: '82.1%',
-      errors: '119',
-    },
-  ],
-  ping: [
-    {
-      id: 'ping-1',
-      target: 'google.com',
-      avgPing: '23 ms',
-      minPing: '18 ms',
-      maxPing: '45 ms',
-      packetLoss: '0.2%',
-      jitter: '2.1 ms',
-    },
-    {
-      id: 'ping-2',
-      target: 'cloudflare.com',
-      avgPing: '19 ms',
-      minPing: '15 ms',
-      maxPing: '38 ms',
-      packetLoss: '0.1%',
-      jitter: '1.8 ms',
-    },
-    {
-      id: 'ping-3',
-      target: 'github.com',
-      avgPing: '42 ms',
-      minPing: '35 ms',
-      maxPing: '67 ms',
-      packetLoss: '0.5%',
-      jitter: '3.2 ms',
-    },
-  ],
-};
+  { id: 'http', label: 'HTTP' },
+  { id: 'dns', label: 'DNS' },
+  { id: 'web', label: 'Web' },
+  { id: 'sms', label: 'SMS' },
+] as const;
 
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState('24h');
-  const [activeTab, setActiveTab] = useState('network');
+  const [timeRange, setTimeRange] = useState<DetailedListParams['start']>('last-day');
+  const [activeTab, setActiveTab] = useState<DetailedListParams['metric']>('network');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Fetch data using the custom hook
+  const { data, isLoading, error, refetch } = useAnalyticsData({
+    start: timeRange,
+    page: currentPage,
+    metric: activeTab
+  });
+
+  // Handle tab change and reset page
+  const handleTabChange = (newTab: DetailedListParams['metric']) => {
+    setActiveTab(newTab);
+    setCurrentPage(1);
+  };
+
+  // Handle time range change and reset page
+  const handleTimeRangeChange = (newTimeRange: DetailedListParams['start']) => {
+    setTimeRange(newTimeRange);
+    setCurrentPage(1);
+  };
+
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  // Handle export functionality
+  const handleExport = () => {
+    if (!data?.data?.values || data.data.values.length === 0) {
+      alert('No data available to export');
+      return;
+    }
+
+    try {
+      // Convert data to CSV format
+      const headers = data.data.labels.join(',');
+      const rows = data.data.values.map(row => 
+        data.data.labels.map(label => {
+          const value = row[label];
+          // Escape commas and quotes in CSV
+          if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+            return `"${value.replace(/"/g, '""')}"`;
+          }
+          return value ?? '';
+        }).join(',')
+      );
+      
+      const csvContent = [headers, ...rows].join('\n');
+      
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${activeTab}_metrics_${timeRange}_page${currentPage}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Export failed:', err);
+      alert('Failed to export data. Please try again.');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -179,7 +98,7 @@ export default function AnalyticsPage() {
           <div className="relative">
             <select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
+              onChange={(e) => handleTimeRangeChange(e.target.value as DetailedListParams['start'])}
               className="appearance-none rounded-md border-gray-300 pl-3 pr-10 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white text-gray-900"
             >
               {timeRanges.map((range) => (
@@ -194,7 +113,26 @@ export default function AnalyticsPage() {
               </svg>
             </div>
           </div>
-          <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          
+          <button 
+            onClick={refetch}
+            disabled={isLoading}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          >
+            <svg className={`-ml-1 mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
+          
+          <button 
+            onClick={handleExport}
+            disabled={isLoading || !data?.data?.values?.length}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          >
+            <svg className="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
             Export Report
           </button>
         </div>
@@ -207,7 +145,7 @@ export default function AnalyticsPage() {
             {metricTabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`${
                   activeTab === tab.id
                     ? 'border-indigo-500 text-indigo-600'
@@ -222,8 +160,69 @@ export default function AnalyticsPage() {
 
         {/* Tab Content */}
         <div className="mt-6">
-          <MetricsTable activeTab={activeTab} metricsData={metricsData} />
+          <DynamicMetricsTable
+            labels={data?.data?.labels || []}
+            values={data?.data?.values || []}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
+
+        {/* Pagination Controls */}
+        {data?.data?.values && data.data.values.length > 0 && (
+          <div className="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+            <div className="flex flex-1 justify-between sm:hidden">
+              <button
+                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage <= 1}
+                className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Next
+              </button>
+            </div>
+            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-700">
+                  Page <span className="font-medium">{currentPage}</span> of {activeTab} metrics
+                </p>
+              </div>
+              <div>
+                <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                  <button
+                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                    disabled={currentPage <= 1}
+                    className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                  >
+                    <span className="sr-only">Previous</span>
+                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                  
+                  <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
+                    {currentPage}
+                  </span>
+                  
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                  >
+                    <span className="sr-only">Next</span>
+                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

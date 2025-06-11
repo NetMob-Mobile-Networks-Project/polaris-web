@@ -121,6 +121,21 @@ export interface DashboardMetrics {
 
 export type TimeRange = 'last-hour' | 'last-day' | 'last-week' | 'last-month';
 
+export interface DetailedListParams {
+  start: 'last-hour' | 'last-day' | 'last-week' | 'last-month';
+  page: number;
+  metric: 'network' | 'ping' | 'http' | 'dns' | 'web' | 'sms';
+}
+
+export interface DetailedListResponse {
+  success: boolean;
+  message: string;
+  data: {
+    labels: string[];
+    values: Record<string, any>[];
+  };
+}
+
 export class MetricsService {
   // Get average download speed
   static async getAvgDownSpeed(timeRange: TimeRange = 'last-day'): Promise<MetricResponse> {
@@ -336,6 +351,18 @@ export class MetricsService {
         return 'Last 24 Hours';
     }
   }
+
+  // Get detailed list of metrics
+  static async getDetailedList(params: DetailedListParams): Promise<DetailedListResponse> {
+    const queryParams = new URLSearchParams({
+      start: params.start,
+      page: params.page.toString(),
+      metric: params.metric
+    });
+
+    const response = await api.get<DetailedListResponse>(`/metrics/detailed-list?${queryParams.toString()}`);
+    return response.data;
+  }
 }
 
 // Convenience exports
@@ -351,4 +378,5 @@ export const {
   transformDistributionToChartData,
   getAllMetrics,
   getTimeRangeLabel,
+  getDetailedList,
 } = MetricsService; 
