@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Card } from '@/components/ui/card';
+import { MetricsTable } from '@/components/metrics/metrics-table';
+import type { MetricsData } from '@/components/metrics/metrics-table';
 
 const timeRanges = [
   { id: '24h', label: 'Last 24 Hours' },
@@ -9,8 +10,166 @@ const timeRanges = [
   { id: '30d', label: 'Last 30 Days' },
 ];
 
+const metricTabs = [
+  { id: 'network', label: 'Network' },
+  { id: 'http', label: 'HTTP' },
+  { id: 'sms', label: 'SMS' },
+  { id: 'dns', label: 'DNS' },
+  { id: 'ping', label: 'Ping' },
+];
+
+// Data structures for each metric type
+const metricsData: MetricsData = {
+  network: [
+    {
+      id: 'net-1',
+      region: 'Tehran North',
+      networkType: '5G',
+      avgSpeed: '85.2 Mbps',
+      signalStrength: '-75 dBm',
+      latency: '32 ms',
+      uptime: '99.8%',
+    },
+    {
+      id: 'net-2',
+      region: 'Tehran South',
+      networkType: '4G/LTE',
+      avgSpeed: '45.8 Mbps',
+      signalStrength: '-82 dBm',
+      latency: '38 ms',
+      uptime: '98.5%',
+    },
+    {
+      id: 'net-3',
+      region: 'Tehran East',
+      networkType: '4G/LTE',
+      avgSpeed: '52.1 Mbps',
+      signalStrength: '-78 dBm',
+      latency: '41 ms',
+      uptime: '99.2%',
+    },
+  ],
+  http: [
+    {
+      id: 'http-1',
+      endpoint: '/api/users',
+      method: 'GET',
+      avgResponseTime: '245 ms',
+      successRate: '99.2%',
+      requestCount: '15,247',
+      errorRate: '0.8%',
+    },
+    {
+      id: 'http-2',
+      endpoint: '/api/data',
+      method: 'POST',
+      avgResponseTime: '412 ms',
+      successRate: '97.8%',
+      requestCount: '8,934',
+      errorRate: '2.2%',
+    },
+    {
+      id: 'http-3',
+      endpoint: '/api/auth',
+      method: 'POST',
+      avgResponseTime: '189 ms',
+      successRate: '99.9%',
+      requestCount: '3,421',
+      errorRate: '0.1%',
+    },
+  ],
+  sms: [
+    {
+      id: 'sms-1',
+      carrier: 'Hamrah-e Avval',
+      messagesSent: '12,547',
+      deliveryRate: '98.5%',
+      avgDeliveryTime: '2.3 sec',
+      failureRate: '1.5%',
+      cost: '$245.67',
+    },
+    {
+      id: 'sms-2',
+      carrier: 'Irancell',
+      messagesSent: '8,932',
+      deliveryRate: '97.2%',
+      avgDeliveryTime: '3.1 sec',
+      failureRate: '2.8%',
+      cost: '$178.42',
+    },
+    {
+      id: 'sms-3',
+      carrier: 'RighTel',
+      messagesSent: '4,521',
+      deliveryRate: '96.8%',
+      avgDeliveryTime: '3.8 sec',
+      failureRate: '3.2%',
+      cost: '$92.15',
+    },
+  ],
+  dns: [
+    {
+      id: 'dns-1',
+      server: '8.8.8.8',
+      queries: '45,321',
+      avgResponseTime: '12 ms',
+      successRate: '99.9%',
+      cacheHitRate: '85.2%',
+      errors: '45',
+    },
+    {
+      id: 'dns-2',
+      server: '1.1.1.1',
+      queries: '38,967',
+      avgResponseTime: '8 ms',
+      successRate: '99.8%',
+      cacheHitRate: '87.4%',
+      errors: '78',
+    },
+    {
+      id: 'dns-3',
+      server: '208.67.222.222',
+      queries: '29,845',
+      avgResponseTime: '15 ms',
+      successRate: '99.6%',
+      cacheHitRate: '82.1%',
+      errors: '119',
+    },
+  ],
+  ping: [
+    {
+      id: 'ping-1',
+      target: 'google.com',
+      avgPing: '23 ms',
+      minPing: '18 ms',
+      maxPing: '45 ms',
+      packetLoss: '0.2%',
+      jitter: '2.1 ms',
+    },
+    {
+      id: 'ping-2',
+      target: 'cloudflare.com',
+      avgPing: '19 ms',
+      minPing: '15 ms',
+      maxPing: '38 ms',
+      packetLoss: '0.1%',
+      jitter: '1.8 ms',
+    },
+    {
+      id: 'ping-3',
+      target: 'github.com',
+      avgPing: '42 ms',
+      minPing: '35 ms',
+      maxPing: '67 ms',
+      packetLoss: '0.5%',
+      jitter: '3.2 ms',
+    },
+  ],
+};
+
 export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState('24h');
+  const [activeTab, setActiveTab] = useState('network');
 
   return (
     <div className="space-y-6">
@@ -41,39 +200,31 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-
-      <Card className="p-6">
-        <h3 className="text-lg font-medium text-gray-800 mb-4">Detailed Metrics</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Region</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Network Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Avg Speed</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Signal Strength</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Latency</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Tehran North</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">5G</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">85.2 Mbps</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">-75 dBm</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">32 ms</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Tehran South</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">4G/LTE</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">45.8 Mbps</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">-82 dBm</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">38 ms</td>
-              </tr>
-            </tbody>
-          </table>
+      <div className="bg-white">
+        {/* Tab Navigation */}
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+            {metricTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`${
+                  activeTab === tab.id
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
         </div>
-      </Card>
+
+        {/* Tab Content */}
+        <div className="mt-6">
+          <MetricsTable activeTab={activeTab} metricsData={metricsData} />
+        </div>
+      </div>
     </div>
   );
 } 
