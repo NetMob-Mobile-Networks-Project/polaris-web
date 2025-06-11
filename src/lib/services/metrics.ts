@@ -23,6 +23,15 @@ export interface NetworkHistogramResponse {
   };
 }
 
+export interface NetworkDistributionResponse {
+  success: boolean;
+  message: string;
+  data: {
+    labels: string[];
+    values: number[];
+  };
+}
+
 export interface ChartDataset {
   label: string;
   data: number[];
@@ -36,6 +45,15 @@ export interface ChartDataset {
 export interface NetworkChartData {
   labels: string[];
   datasets: ChartDataset[];
+}
+
+export interface NetworkDistributionData {
+  labels: string[];
+  datasets: [{
+    data: number[];
+    backgroundColor: string[];
+    borderWidth: number;
+  }];
 }
 
 export interface DashboardMetrics {
@@ -94,6 +112,12 @@ export class MetricsService {
     return response.data;
   }
 
+  // Get network distribution data
+  static async getNetworkDistribution(timeRange: TimeRange = 'last-day'): Promise<NetworkDistributionResponse> {
+    const response = await api.get<NetworkDistributionResponse>(`/metrics/network-distribution?start=${timeRange}`);
+    return response.data;
+  }
+
   // Transform histogram data to chart format
   static transformHistogramToChartData(histogramData: NetworkHistogramResponse['data']): NetworkChartData {
     const { labels, uploadData, downloadData, latencyData } = histogramData;
@@ -133,6 +157,34 @@ export class MetricsService {
           yAxisID: 'y1',
         },
       ],
+    };
+  }
+
+  // Transform distribution data to chart format
+  static transformDistributionToChartData(distributionData: NetworkDistributionResponse['data']): NetworkDistributionData {
+    const { labels, values } = distributionData;
+
+    // Generate colors based on the number of labels
+    const colors = [
+      'rgb(99, 102, 241)',   // indigo-500
+      'rgb(59, 130, 246)',   // blue-500
+      'rgb(107, 114, 128)',  // gray-500
+      'rgb(34, 197, 94)',    // green-500
+      'rgb(249, 115, 22)',   // orange-500
+      'rgb(239, 68, 68)',    // red-500
+      'rgb(168, 85, 247)',   // purple-500
+      'rgb(236, 72, 153)',   // pink-500
+    ];
+
+    const backgroundColor = labels.map((_, index) => colors[index % colors.length]);
+
+    return {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor,
+        borderWidth: 0,
+      }],
     };
   }
 
@@ -229,7 +281,9 @@ export const {
   getAvgLatency,
   getNetworkAvailability,
   getNetworkHistogram,
+  getNetworkDistribution,
   transformHistogramToChartData,
+  transformDistributionToChartData,
   getAllMetrics,
   getTimeRangeLabel,
 } = MetricsService; 

@@ -7,6 +7,7 @@ import { DetailedMetricsTable } from '@/components/metrics/detailed-metrics-tabl
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useMetrics } from '@/lib/hooks/useMetrics';
 import { useNetworkChart } from '@/lib/hooks/useNetworkChart';
+import { useNetworkDistribution } from '@/lib/hooks/useNetworkDistribution';
 import { MetricsService, TimeRange } from '@/lib/services/metrics';
 import type { DetailedMetric } from '@/components/metrics/detailed-metrics-table';
 
@@ -45,6 +46,12 @@ function DashboardContent() {
     error: chartError, 
     refetch: refetchChart 
   } = useNetworkChart(timeRange);
+  const { 
+    distributionData, 
+    isLoading: distributionLoading, 
+    error: distributionError, 
+    refetch: refetchDistribution 
+  } = useNetworkDistribution(timeRange);
 
   const handleTimeRangeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setTimeRange(e.target.value as TimeRange);
@@ -56,7 +63,7 @@ function DashboardContent() {
   };
 
   const handleRefresh = async () => {
-    await Promise.all([refetch(), refetchChart()]);
+    await Promise.all([refetch(), refetchChart(), refetchDistribution()]);
   };
 
   // Prepare metrics array for display
@@ -95,8 +102,8 @@ function DashboardContent() {
     },
   ];
 
-  const isAnyLoading = isLoading || chartLoading;
-  const hasAnyError = error || chartError;
+  const isAnyLoading = isLoading || chartLoading || distributionLoading;
+  const hasAnyError = error || chartError || distributionError;
 
   return (
     <div className="space-y-6">
@@ -148,6 +155,7 @@ function DashboardContent() {
               </h3>
               {error && <p className="mt-1 text-sm text-red-700">Metrics: {error}</p>}
               {chartError && <p className="mt-1 text-sm text-red-700">Chart: {chartError}</p>}
+              {distributionError && <p className="mt-1 text-sm text-red-700">Distribution: {distributionError}</p>}
               <div className="mt-2">
                 <button
                   onClick={handleRefresh}
@@ -206,13 +214,11 @@ function DashboardContent() {
         <Card className="p-6">
           <h3 className="text-lg font-medium text-gray-800 mb-4">Network Distribution</h3>
           <div className="h-80">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-pulse bg-gray-200 h-full w-full rounded"></div>
-              </div>
-            ) : (
-              <NetworkDistributionChart />
-            )}
+            <NetworkDistributionChart 
+              data={distributionData}
+              isLoading={distributionLoading}
+              error={distributionError}
+            />
           </div>
         </Card>
       </div>
