@@ -11,15 +11,23 @@ interface NetworkMapProps {
   isLoading?: boolean;
   error?: string | null;
   onBoundsChange?: (bounds: { minLat: number; maxLat: number; minLong: number; maxLong: number }) => void;
+  thresholds?: {
+    excellent: number;
+    good: number;
+    fair: number;
+    unit: string;
+  };
 }
 
-export default function NetworkMap({ activeMetric, data = [], isLoading, error, onBoundsChange }: NetworkMapProps) {
+export default function NetworkMap({ activeMetric, data = [], isLoading, error, onBoundsChange, thresholds }: NetworkMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
+  const currentDataRef = useRef<MapDataPoint[]>([]);
+  const isInitializedRef = useRef<boolean>(false);
 
+  // Initialize map only once
   useEffect(() => {
-    // Initialize map if it hasn't been initialized yet
-    if (!mapRef.current) {
+    if (!isInitializedRef.current) {
       mapRef.current = L.map('map').setView([35.6892, 51.3890], 12);
       
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -50,12 +58,52 @@ export default function NetworkMap({ activeMetric, data = [], isLoading, error, 
         // Trigger initial bounds change to load data
         setTimeout(handleBoundsChange, 100);
       }
+
+      isInitializedRef.current = true;
+    }
+  }, [onBoundsChange]);
+
+  // Function to update marker colors without recreating them
+  const updateMarkerColors = (metric: string) => {
+    if (!markersLayerRef.current) return;
+
+    markersLayerRef.current.eachLayer((layer) => {
+      const circle = layer as L.Circle;
+      const pointData = (circle as any)._pointData;
+      
+      if (pointData && (circle as any)._currentMetric !== metric) {
+        const value = getMetricValue(pointData, metric);
+        const color = getColorForValue(value, metric, thresholds);
+        
+        circle.setStyle({
+          color: color,
+          fillColor: color
+        });
+        
+        (circle as any)._currentMetric = metric;
+      }
+    });
+  };
+
+  // Handle marker updates separately from map initialization
+  useEffect(() => {
+    // Only update markers if we have a valid map and the data has actually changed
+    if (!mapRef.current || !markersLayerRef.current) return;
+
+    // Check if data has actually changed to avoid unnecessary re-renders
+    const dataChanged = JSON.stringify(data) !== JSON.stringify(currentDataRef.current);
+    
+    if (!dataChanged && data.length > 0) {
+      // If data hasn't changed but activeMetric has, just update colors
+      updateMarkerColors(activeMetric);
+      return;
     }
 
+    // Update current data reference
+    currentDataRef.current = data;
+
     // Clear existing markers
-    if (markersLayerRef.current) {
-      markersLayerRef.current.clearLayers();
-    }
+    markersLayerRef.current.clearLayers();
 
     // Handle loading state
     if (isLoading) {
@@ -90,7 +138,7 @@ export default function NetworkMap({ activeMetric, data = [], isLoading, error, 
 
       try {
         const value = getMetricValue(point, activeMetric);
-        const color = getColorForValue(value, activeMetric);
+        const color = getColorForValue(value, activeMetric, thresholds);
         
         const circle = L.circle(
           [lat, lng],
@@ -102,6 +150,10 @@ export default function NetworkMap({ activeMetric, data = [], isLoading, error, 
             weight: 1
           }
         );
+
+        // Store point data and metric for later color updates
+        (circle as any)._pointData = point;
+        (circle as any)._currentMetric = activeMetric;
 
         // Format the popup content with all available fields
         const popupContent = `
@@ -173,16 +225,7 @@ export default function NetworkMap({ activeMetric, data = [], isLoading, error, 
     if (data.length > 0) {
       console.log(`Map markers: ${validPoints} valid, ${invalidPoints} invalid out of ${data.length} total points`);
     }
-
-    // Cleanup function
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.off('moveend');
-        mapRef.current.off('zoomend');
-        mapRef.current.off('resize');
-      }
-    };
-  }, [activeMetric, data, isLoading, error, onBoundsChange]);
+  }, [data, activeMetric, isLoading, error, thresholds]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -190,6 +233,7 @@ export default function NetworkMap({ activeMetric, data = [], isLoading, error, 
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
+        isInitializedRef.current = false;
       }
     };
   }, []);
@@ -241,8 +285,29 @@ function getMetricValue(point: MapDataPoint, metric: string): number {
   }
 }
 
-function getColorForValue(value: number, metric: string): string {
-  // Customize these thresholds based on your requirements
+function getColorForValue(value: number, metric: string, customThresholds?: { excellent: number; good: number; fair: number; unit: string }): string {
+  // Use custom thresholds if provided, otherwise fall back to defaults
+  if (customThresholds) {
+    const { excellent, good, fair } = customThresholds;
+    
+    // For signal strength (negative values), use >= comparison
+    if (metric === 'signal') {
+      if (value >= excellent) return '#22c55e'; // green-500 (excellent)
+      if (value >= good) return '#eab308'; // yellow-500 (good)
+      if (value >= fair) return '#f97316'; // orange-500 (fair)
+      return '#ef4444'; // red-500 (poor)
+    }
+    
+    // For quality (positive values), use >= comparison
+    if (metric === 'quality') {
+      if (value >= excellent) return '#22c55e'; // green-500 (excellent)
+      if (value >= good) return '#eab308'; // yellow-500 (good)
+      if (value >= fair) return '#f97316'; // orange-500 (fair)
+      return '#ef4444'; // red-500 (poor)
+    }
+  }
+  
+  // Default thresholds (fallback)
   switch (metric) {
     case 'signal':
       if (value >= -70) return '#22c55e'; // green-500 (excellent)
