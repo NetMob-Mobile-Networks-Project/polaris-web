@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 
 interface DynamicMetricsTableProps {
   labels: string[];
-  values: Record<string, any>[];
+  values: Record<string, unknown>[];
   isLoading?: boolean;
   error?: string | null;
 }
@@ -56,7 +56,7 @@ export function DynamicMetricsTable({ labels, values, isLoading, error }: Dynami
   }
 
   // Helper function to format values for display
-  const formatValue = (value: any): string => {
+  const formatValue = (value: unknown): string => {
     if (value === null || value === undefined) {
       return 'N/A';
     }

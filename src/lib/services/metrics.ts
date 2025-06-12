@@ -132,7 +132,7 @@ export interface DetailedListResponse {
   message: string;
   data: {
     labels: string[];
-    values: Record<string, any>[];
+    values: Record<string, unknown>[];
   };
 }
 

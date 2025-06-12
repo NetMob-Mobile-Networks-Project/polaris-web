@@ -134,8 +134,8 @@ export default function SettingsPage() {
 
     // Get selected test types
     const testTypes = Object.entries(selectedTests)
-      .filter(([_, enabled]) => enabled)
-      .map(([testType, _]) => testType);
+      .filter(([, enabled]) => enabled)
+      .map(([testType]) => testType);
 
     if (testTypes.length === 0) {
       alert('At least one test type must be selected');

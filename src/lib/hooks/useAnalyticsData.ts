@@ -13,12 +13,12 @@ export function useAnalyticsData(params: DetailedListParams): UseAnalyticsDataRe
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (fetchParams: DetailedListParams) => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const response = await MetricsService.getDetailedList(params);
+      const response = await MetricsService.getDetailedList(fetchParams);
       setData(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch analytics data');
@@ -26,15 +26,15 @@ export function useAnalyticsData(params: DetailedListParams): UseAnalyticsDataRe
     } finally {
       setIsLoading(false);
     }
-  }, [params.start, params.page, params.metric]);
+  }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData(params);
+  }, [fetchData, params.start, params.page, params.metric]);
 
   const refetch = useCallback(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData(params);
+  }, [fetchData, params]);
 
   return {
     data,

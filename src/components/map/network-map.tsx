@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { MapDataPoint } from '@/lib/services/metrics';
@@ -64,14 +64,14 @@ export default function NetworkMap({ activeMetric, data = [], isLoading, error, 
   }, [onBoundsChange]);
 
   // Function to update marker colors without recreating them
-  const updateMarkerColors = (metric: string) => {
+  const updateMarkerColors = useCallback((metric: string) => {
     if (!markersLayerRef.current) return;
-
+    
     markersLayerRef.current.eachLayer((layer) => {
       const circle = layer as L.Circle;
-      const pointData = (circle as any)._pointData;
+      const pointData = (circle as L.Circle & { _pointData?: MapDataPoint; _currentMetric?: string })._pointData;
       
-      if (pointData && (circle as any)._currentMetric !== metric) {
+      if (pointData && (circle as L.Circle & { _currentMetric?: string })._currentMetric !== metric) {
         const value = getMetricValue(pointData, metric);
         const color = getColorForValue(value, metric, thresholds);
         
@@ -80,10 +80,10 @@ export default function NetworkMap({ activeMetric, data = [], isLoading, error, 
           fillColor: color
         });
         
-        (circle as any)._currentMetric = metric;
+        (circle as L.Circle & { _currentMetric: string })._currentMetric = metric;
       }
     });
-  };
+  }, [thresholds]);
 
   // Handle marker updates separately from map initialization
   useEffect(() => {
@@ -152,8 +152,8 @@ export default function NetworkMap({ activeMetric, data = [], isLoading, error, 
         );
 
         // Store point data and metric for later color updates
-        (circle as any)._pointData = point;
-        (circle as any)._currentMetric = activeMetric;
+        (circle as L.Circle & { _pointData: MapDataPoint; _currentMetric: string })._pointData = point;
+        (circle as L.Circle & { _pointData: MapDataPoint; _currentMetric: string })._currentMetric = activeMetric;
 
         // Format the popup content with all available fields
         const popupContent = `
@@ -225,7 +225,7 @@ export default function NetworkMap({ activeMetric, data = [], isLoading, error, 
     if (data.length > 0) {
       console.log(`Map markers: ${validPoints} valid, ${invalidPoints} invalid out of ${data.length} total points`);
     }
-  }, [data, activeMetric, isLoading, error, thresholds]);
+  }, [data, activeMetric, isLoading, error, thresholds, updateMarkerColors]);
 
   // Cleanup on unmount
   useEffect(() => {
