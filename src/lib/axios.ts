@@ -82,7 +82,7 @@ export default api;
 export { api };
 
 // Types for common API responses (optional)
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data: T;
   message?: string;
   success: boolean;

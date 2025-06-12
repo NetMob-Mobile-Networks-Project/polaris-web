@@ -46,13 +46,16 @@ export class AuthService {
       localStorage.setItem(EXPIRES_KEY, expires_at.toString());
       
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle specific error cases
-      if (error.response?.status === 401) {
-        throw new Error('Invalid email or password');
-      }
-      if (error.response?.status === 400) {
-        throw new Error('Email and password are required');
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 401) {
+          throw new Error('Invalid email or password');
+        }
+        if (axiosError.response?.status === 400) {
+          throw new Error('Email and password are required');
+        }
       }
       throw new Error('Login failed. Please try again.');
     }
@@ -74,11 +77,14 @@ export class AuthService {
       localStorage.setItem(USER_KEY, JSON.stringify(response.data));
       
       return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        // Token is invalid, clear auth data
-        this.logout();
-        throw new Error('Session expired. Please login again.');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 401) {
+          // Token is invalid, clear auth data
+          this.logout();
+          throw new Error('Session expired. Please login again.');
+        }
       }
       throw new Error('Failed to fetch user profile');
     }

@@ -8,7 +8,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useMetrics } from '@/lib/hooks/useMetrics';
 import { useNetworkChart } from '@/lib/hooks/useNetworkChart';
 import { useNetworkDistribution } from '@/lib/hooks/useNetworkDistribution';
-import { MetricsService, TimeRange } from '@/lib/services/metrics';
+import { TimeRange } from '@/lib/services/metrics';
 import type { DetailedMetric } from '@/components/metrics/detailed-metrics-table';
 
 // Keep detailed metrics static for now (can be updated later with real data)
