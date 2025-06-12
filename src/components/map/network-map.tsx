@@ -71,7 +71,7 @@ export default function NetworkMap({ activeMetric, data = [], isLoading, error, 
       const circle = layer as L.Circle;
       const pointData = (circle as L.Circle & { _pointData?: MapDataPoint; _currentMetric?: string })._pointData;
       
-      if (pointData && (circle as L.Circle & { _currentMetric?: string })._currentMetric !== metric) {
+      if (pointData) {
         const value = getMetricValue(pointData, metric);
         const color = getColorForValue(value, metric, thresholds);
         
@@ -84,6 +84,13 @@ export default function NetworkMap({ activeMetric, data = [], isLoading, error, 
       }
     });
   }, [thresholds]);
+
+  // Handle threshold changes separately to update marker colors
+  useEffect(() => {
+    if (markersLayerRef.current && data.length > 0) {
+      updateMarkerColors(activeMetric);
+    }
+  }, [thresholds, activeMetric, updateMarkerColors]);
 
   // Handle marker updates separately from map initialization
   useEffect(() => {

@@ -28,10 +28,10 @@ const defaultThresholds = {
     unit: 'dBm'
   },
   quality: {
-    excellent: 80,
-    good: 60,
-    fair: 40,
-    unit: '%'
+    excellent: -9,
+    good: -14,
+    fair: -19,
+    unit: 'dB'
   }
 };
 
@@ -294,6 +294,13 @@ function MapContent() {
       }, 0) / totalMeasurements).toFixed(1)
     : 'N/A';
 
+  const avgSignalQuality = totalMeasurements > 0 
+    ? (mapData.reduce((sum, point) => {
+        const signalQuality = point.signal_quality || 0;
+        return sum + signalQuality;
+      }, 0) / totalMeasurements).toFixed(1)
+    : 'N/A';
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -388,6 +395,16 @@ function MapContent() {
                     <div className="animate-pulse bg-gray-200 h-6 w-16 rounded"></div>
                   ) : (
                     `${avgSignalStrength} ${avgSignalStrength !== 'N/A' ? 'dBm' : ''}`
+                  )}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-700">Average Signal Quality</div>
+                <div className="text-lg font-medium text-gray-900">
+                  {isLoading ? (
+                    <div className="animate-pulse bg-gray-200 h-6 w-16 rounded"></div>
+                  ) : (
+                    `${avgSignalQuality} ${avgSignalQuality !== 'N/A' ? 'dB' : ''}`
                   )}
                 </div>
               </div>
