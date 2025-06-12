@@ -107,14 +107,14 @@ function DashboardContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-800">Network Overview</h1>
-        <div className="flex items-center space-x-4">
-          <div className="relative">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-lg font-semibold text-gray-800">Network Overview</h1>
+        <div className="flex flex-row gap-2 w-full sm:w-auto">
+          <div className="relative w-1/2 sm:w-auto sm:min-w-[180px]">
             <select
               value={timeRange}
               onChange={handleTimeRangeChange}
-              className="appearance-none rounded-md border-gray-300 pl-3 pr-10 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white text-gray-900"
+              className="appearance-none rounded-md border-gray-300 pl-3 pr-8 py-2 text-xs focus:border-indigo-500 focus:ring-indigo-500 bg-white text-gray-900 w-full"
               disabled={isAnyLoading}
             >
               {timeRangeOptions.map((option) => (
@@ -132,16 +132,24 @@ function DashboardContent() {
           <button
             onClick={handleRefresh}
             disabled={isAnyLoading}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            className="inline-flex items-center justify-center px-2 py-2 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 w-1/2 text-center"
           >
+            <svg className={`-ml-1 mr-2 h-4 w-4 ${isAnyLoading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
             {isAnyLoading ? 'Refreshing...' : 'Refresh'}
           </button>
-          {/* <button
+          {/* Uncomment and update the export button if you want to add it here
+          <button
             onClick={handleExportData}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center justify-center px-2 py-2 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-1/2 text-center"
           >
+            <svg className="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
             Export Data
-          </button> */}
+          </button>
+          */}
         </div>
       </div>
 
