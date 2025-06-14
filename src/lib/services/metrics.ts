@@ -307,6 +307,19 @@ export class MetricsService {
 
   // Transform distribution data to chart format
   static transformDistributionToChartData(distributionData: NetworkDistributionResponse['data']): NetworkDistributionData {
+    // Validate input data
+    if (!distributionData || !distributionData.labels || !distributionData.values) {
+      console.warn('Invalid distribution data:', distributionData);
+      return {
+        labels: [],
+        datasets: [{
+          data: [],
+          backgroundColor: [],
+          borderWidth: 0,
+        }],
+      };
+    }
+
     const { labels, values } = distributionData;
 
     // Generate colors based on the number of labels
@@ -321,12 +334,15 @@ export class MetricsService {
       'rgb(236, 72, 153)',   // pink-500
     ];
 
-    const backgroundColor = labels.map((_, index) => colors[index % colors.length]);
+    // Ensure we have valid arrays
+    const validLabels = Array.isArray(labels) ? labels : [];
+    const validValues = Array.isArray(values) ? values : [];
+    const backgroundColor = validLabels.map((_, index) => colors[index % colors.length]);
 
     return {
-      labels,
+      labels: validLabels,
       datasets: [{
-        data: values,
+        data: validValues,
         backgroundColor,
         borderWidth: 0,
       }],
