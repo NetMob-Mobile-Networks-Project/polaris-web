@@ -3,10 +3,11 @@ import { Card } from '@/components/ui/card';
 export interface DetailedMetric {
   id: string;
   region: string;
-  networkType: string;
-  avgSpeed: string;
-  signalStrength: string;
-  latency: string;
+  average_strength: number;
+  average_quality: number;
+  measurement_count: number;
+  strength_class: string;
+  quality_class: string;
 }
 
 interface DetailedMetricsTableProps {
@@ -22,20 +23,22 @@ export function DetailedMetricsTable({ metrics }: DetailedMetricsTableProps) {
           <thead>
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Region</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Network Type</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Avg Speed</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Signal Strength</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Latency</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Quality</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Measurements count</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {metrics.map((metric) => (
               <tr key={metric.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{metric.region}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{metric.networkType}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{metric.avgSpeed}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{metric.signalStrength}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{metric.latency}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {metric.average_strength.toFixed(1)} dBm ({metric.strength_class})
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {metric.average_quality.toFixed(1)} dBm ({metric.quality_class})
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{metric.measurement_count}</td>
               </tr>
             ))}
           </tbody>

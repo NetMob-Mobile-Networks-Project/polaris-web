@@ -187,6 +187,21 @@ export interface DeleteUserApiResponse {
   message: string;
 }
 
+export interface RegionListResponse {
+  success: boolean;
+  message: string;
+  data: {
+    regions: Array<{
+      name: string;
+      average_strength: number;
+      average_quality: number;
+      measurement_count: number;
+      strength_class: string;
+      quality_class: string;
+    }>;
+  };
+}
+
 export class MetricsService {
   // Get average download speed
   static async getAvgDownSpeed(timeRange: TimeRange = 'last-day'): Promise<MetricResponse> {
@@ -449,6 +464,12 @@ export class MetricsService {
     const response = await api.delete<DeleteUserApiResponse>(`/admin/users/${userId}`);
     return response.data;
   }
+
+  // Get region list with statistics
+  static async getRegionList(): Promise<RegionListResponse> {
+    const response = await api.get<RegionListResponse>('/metrics/region-list');
+    return response.data;
+  }
 }
 
 // Convenience exports
@@ -470,4 +491,5 @@ export const {
   getUsers,
   createUser,
   deleteUser,
+  getRegionList,
 } = MetricsService; 

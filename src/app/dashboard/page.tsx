@@ -9,27 +9,8 @@ import { useMetrics } from '@/lib/hooks/useMetrics';
 import { useNetworkChart } from '@/lib/hooks/useNetworkChart';
 import { useNetworkDistribution } from '@/lib/hooks/useNetworkDistribution';
 import { TimeRange } from '@/lib/services/metrics';
-import type { DetailedMetric } from '@/components/metrics/detailed-metrics-table';
+import { useRegionList } from '@/lib/hooks/useRegionList';
 
-// Keep detailed metrics static for now (can be updated later with real data)
-const detailedMetrics: DetailedMetric[] = [
-  {
-    id: 'tehran-north',
-    region: 'Tehran North',
-    networkType: '5G',
-    avgSpeed: '85.2 Mbps',
-    signalStrength: '-75 dBm',
-    latency: '32 ms',
-  },
-  {
-    id: 'tehran-south',
-    region: 'Tehran South',
-    networkType: '4G/LTE',
-    avgSpeed: '45.8 Mbps',
-    signalStrength: '-82 dBm',
-    latency: '38 ms',
-  },
-];
 
 const timeRangeOptions: { value: TimeRange; label: string }[] = [
   { value: 'last-hour', label: 'Last Hour' },
@@ -52,6 +33,12 @@ function DashboardContent() {
     error: distributionError, 
     refetch: refetchDistribution 
   } = useNetworkDistribution(timeRange);
+  const {
+    metrics: regionMetrics,
+    isLoading: regionLoading,
+    error: regionError,
+    refetch: refetchRegions
+  } = useRegionList();
 
   const handleTimeRangeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setTimeRange(e.target.value as TimeRange);
@@ -63,7 +50,7 @@ function DashboardContent() {
   // };
 
   const handleRefresh = async () => {
-    await Promise.all([refetch(), refetchChart(), refetchDistribution()]);
+    await Promise.all([refetch(), refetchChart(), refetchDistribution(), refetchRegions()]);
   };
 
   // Prepare metrics array for display
@@ -102,8 +89,8 @@ function DashboardContent() {
     },
   ];
 
-  const isAnyLoading = isLoading || chartLoading || distributionLoading;
-  const hasAnyError = error || chartError || distributionError;
+  const isAnyLoading = isLoading || chartLoading || distributionLoading || regionLoading;
+  const hasAnyError = error || chartError || distributionError || regionError;
 
   return (
     <div className="space-y-6">
@@ -164,6 +151,7 @@ function DashboardContent() {
               {error && <p className="mt-1 text-sm text-red-700">Metrics: {error}</p>}
               {chartError && <p className="mt-1 text-sm text-red-700">Chart: {chartError}</p>}
               {distributionError && <p className="mt-1 text-sm text-red-700">Distribution: {distributionError}</p>}
+              {regionError && <p className="mt-1 text-sm text-red-700">Regions: {regionError}</p>}
               <div className="mt-2">
                 <button
                   onClick={handleRefresh}
@@ -232,7 +220,7 @@ function DashboardContent() {
       </div>
 
       {/* Detailed Metrics Table */}
-      <DetailedMetricsTable metrics={detailedMetrics} />
+      <DetailedMetricsTable metrics={regionMetrics} />
     </div>
   );
 }
