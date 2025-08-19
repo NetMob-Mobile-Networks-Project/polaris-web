@@ -205,7 +205,7 @@ The network coverage map automatically fetches new data when:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `NEXT_PUBLIC_API_BASE_URL` | Backend API base URL | `http://45.139.11.225:8080/api/v1` |
+| `NEXT_PUBLIC_API_BASE_URL` | Backend API base URL | `http://156.255.1.85:8080/api/v1` |
 | `NODE_ENV` | Application environment | `development` |
 
 ## Development
