@@ -246,7 +246,7 @@ function MapContent() {
 
     try {
       // Construct the export URL
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://45.139.11.225:8080/api/v1';
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://156.255.1.85:8080/api/v1';
       const exportUrl = `${baseUrl}/export/kml`;
       
       // Get auth token for the request
